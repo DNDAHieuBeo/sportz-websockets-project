@@ -6,6 +6,7 @@ import {
     listMatchesQuerySchema,
 } from "../validation/matches.js";
 import { getMatchStatus } from "../utils/match-status.js";
+import { desc } from "drizzle-orm";
 
 export const matchRouter = Router();
 const MAX_LIMIT = 100;
@@ -36,9 +37,7 @@ matchRouter.get("/", async (req, res) => {
 
 matchRouter.post("/", async (req, res) => {
     const parsed = createMatchSchema.safeParse(req.body);
-    const {
-        data: { startTime, endTime, homeScore, awayScore },
-    } = parsed;
+
     if (!parsed.success) {
         return res
             .status(400)
@@ -47,6 +46,8 @@ matchRouter.post("/", async (req, res) => {
                 details: JSON.stringify(parsed.error),
             });
     }
+
+    const { startTime, endTime, homeScore, awayScore } = parsed.data;
     try {
         const [event] = await db
             .insert(matches)
